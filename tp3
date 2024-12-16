@@ -1,87 +1,103 @@
 #include <stdio.h>
 #include <stdlib.h>
-typedef struct element {
-    int val;
-    struct element* suivant;
-}element;
 
-element* creerListe() {
-return NULL;
+// تعريف بنية عنصر في القائمة المتصلة
+typedef struct element {
+    int val; // قيمة العنصر
+    struct element *suivant; // مؤشر إلى العنصر التالي
+} element;
+
+// دالة لإنشاء قائمة فارغة
+element *creerListe() {
+    return NULL; // تعيد مؤشرًا يشير إلى قائمة فارغة
 }
-void afficherListe(element* L) { 
-    element* courant = L;
-    while (courant != NULL) {
-        printf("%d->", courant->val);
-        courant = courant->suivant;
-    }
-    printf("NULL");
-}
-element* supprimerEnFin(element* L) {
-    if (L == NULL) {
-        printf("la liste est deja viden");
-        return NULL; 
-    }
-    element* courant = L;
-    if (courant->suivant == NULL) {
-        free(courant);
-        return NULL;
-    }
-    while (courant->suivant->suivant != NULL) {
-        courant = courant->suivant;
-    }
-    free(courant->suivant);
-    courant->suivant = NULL;
-    return L;
-}
-element* ajouterEnDebut(element* L, int nouvval) {
-    element* nouvelement;
-    nouvelement = (element*)malloc(sizeof(element));
-    nouvelement->val = nouvval;
-    nouvelement->suivant = NULL;
-    if (L != NULL) { 
-        nouvelement->suivant = L;
-    }
-    L = nouvelement;
-    return L;
-}
-element* viderListe(element* L) {
-    element* temp;
-    while (L != NULL) {
-        temp = L;
-        L = L->suivant;
-        free(temp);
-    }
-    printf("la liste est viden");
-}
-element* chargerListe(int Tab[], int n) {
-    element* L = NULL;
-    element* temp = NULL;    
-    for (int i = 0; i < n; i++) {
-        element* nouvE = (element*)malloc(sizeof(element));
-        nouvE->val = Tab[i];
-        nouvE->suivant = NULL;        
-        if (L == NULL) {
-            L = nouvE;
-            temp = nouvE;
+
+// دالة لتحميل عناصر من مصفوفة إلى قائمة متصلة
+element *chargerListe(int *Tab, int taille) {
+    element *tete = NULL; // مؤشر إلى رأس القائمة
+    element *courant = NULL; // مؤشر لمتابعة نهاية القائمة
+    for (int i = 0; i < taille; i++) {
+        element *nouveau = (element *)malloc(sizeof(element)); // تخصيص عنصر جديد
+        nouveau->val = Tab[i]; // نسخ قيمة العنصر
+        nouveau->suivant = NULL; // لا يوجد عنصر تالٍ بعده
+        if (tete == NULL) { 
+            tete = nouveau; // إذا كانت القائمة فارغة، يصبح العنصر الجديد هو الرأس
         } else {
-            temp->suivant = nouvE;
-            temp = nouvE;
+            courant->suivant = nouveau; // ربط العنصر الجديد مع نهاية القائمة
         }
+        courant = nouveau; // تحديث المؤشر ليشير إلى العنصر الجديد
     }
-    return L;
+    return tete; // إرجاع رأس القائمة
 }
+
+// دالة لعرض عناصر القائمة
+void afficherListe(element *L) {
+    element *courant = L; // بداية من رأس القائمة
+    while (courant != NULL) { 
+        printf("%d", courant->val); // طباعة قيمة العنصر
+        if (courant->suivant != NULL) {
+            printf("->"); // طباعة السهم بين العناصر
+        }
+        courant = courant->suivant; // الانتقال إلى العنصر التالي
+    }
+    printf("->NULL\n"); // طباعة نهاية القائمة
+}
+
+// دالة لحذف العنصر الأخير في القائمة
+element *supprimerEnFin(element *L) {
+    if (L == NULL) { 
+        return NULL; // إذا كانت القائمة فارغة
+    }
+    if (L->suivant == NULL) {
+        free(L); // حذف العنصر الوحيد
+        return NULL; // تصبح القائمة فارغة
+    }
+    element *courant = L; 
+    while (courant->suivant->suivant != NULL) {
+        courant = courant->suivant; // البحث عن العنصر قبل الأخير
+    }
+    free(courant->suivant); // حذف العنصر الأخير
+    courant->suivant = NULL; // إنهاء القائمة عند العنصر قبل الأخير
+    return L; // إرجاع رأس القائمة
+}
+
+// دالة لإضافة عنصر جديد في بداية القائمة
+element *ajouterEnDebut(element *L, int val) {
+    element *nouveau = (element *)malloc(sizeof(element)); // تخصيص عنصر جديد
+    nouveau->val = val; // تعيين القيمة
+    nouveau->suivant = L; // ربط العنصر الجديد برأس القائمة الحالي
+    return nouveau; // إرجاع العنصر الجديد كرأس القائمة
+}
+
+// دالة لتفريغ القائمة وحذف كل عناصرها
+void viderListe(element *L) {
+    element *courant = L; // بداية من رأس القائمة
+    while (courant != NULL) {
+        element *temp = courant; // تخزين العنصر الحالي مؤقتًا
+        courant = courant->suivant; // الانتقال إلى العنصر التالي
+        free(temp); // تحرير العنصر الحالي
+    }
+    printf("La liste est vide.\n"); // طباعة رسالة تفيد بأن القائمة فارغة
+}
+
 int main() {
-    int tab[10] = {1, 3, 5, 7, 8, 10, 9, 11, 13, 20};
-    element* L = creerListe();
-    L = chargerListe(tab, 10); 
-    afficherListe(L);   
-    printf("\n_\n");
-    L = supprimerEnFin(L);
-    afficherListe(L); 
-    printf("\n_\n");
-    L = ajouterEnDebut(L, 40);
-    afficherListe(L); 
-    printf("\n_\n");
-    viderListe(L);
+    // تعريف مصفوفة لإضافة عناصر إلى القائمة
+    int Tab[10] = {1, 3, 5, 7, 8, 10, 9, 11, 13, 20};
+    element *liste = creerListe(); // إنشاء قائمة فارغة
+    liste = chargerListe(Tab, 10); // تحميل العناصر من المصفوفة إلى القائمة
+
+    printf("Liste initiale: ");
+    afficherListe(liste); // عرض القائمة الأولية
+
+    liste = supprimerEnFin(liste); // حذف العنصر الأخير
+    printf("Liste après suppression en fin: ");
+    afficherListe(liste); // عرض القائمة بعد الحذف
+
+    liste = ajouterEnDebut(liste, 40); // إضافة عنصر جديد في بداية القائمة
+    printf("Liste après ajout en début: ");
+    afficherListe(liste); // عرض القائمة بعد الإضافة
+
+    viderListe(liste); // تفريغ القائمة وحذف جميع العناصر
+
     return 0;
 }
